@@ -1,3 +1,9 @@
+[postbg]bg5.png[/postbg][markdown]
+
+https://github.com/ApliNi/PerPlayerWorld
+
+---
+
 # PerPlayerWorld `v1.0`
 **[定制插件]** 为每个玩家创建单独的维度, 通过末影箱传送
 
@@ -24,3 +30,12 @@ command:
   loadWorld: 'world load ${worldName}'
 
 ```
+
+
+---
+
+### MCBBS
+本插件所用所有代码均为原创,不存在借用/抄袭等行为
+本插件为非盈利性插件，免费发布，严禁销售和转卖
+
+[/markdown]

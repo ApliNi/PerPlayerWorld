@@ -1,0 +1,8 @@
+
+message:
+  loadWorld: '维度正在加载... 请稍后再试一次'
+  tp: '正在传送...'
+
+command:
+  copyWorld: 'world copy ppw_world ${worldName}'
+  loadWorld: 'world load ${worldName}'

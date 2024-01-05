@@ -1,0 +1,4 @@
+name: PerPlayerWorld
+version: '${project.version}'
+main: io.github.aplini.perplayerworld.PerPlayerWorld
+api-version: '1.20'
