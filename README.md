@@ -1,4 +1,4 @@
-# PerPlayerWorld `v1.0`
+# PerPlayerWorld `v1.2`
 **[定制插件]** 为每个玩家创建单独的维度, 通过末影箱传送
 
 ---
