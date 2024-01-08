@@ -23,4 +23,6 @@ command:
   copyWorld: 'world copy ppw_world ${worldName}'
   loadWorld: 'world load ${worldName}'
 
+z: {}
+
 ```

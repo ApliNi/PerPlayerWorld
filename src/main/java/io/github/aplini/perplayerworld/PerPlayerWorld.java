@@ -5,6 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +15,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,12 +24,17 @@ import java.util.concurrent.TimeUnit;
 
 public final class PerPlayerWorld extends JavaPlugin implements Listener {
     List<String> loadLock = new ArrayList<>();
+    File configFile;
+    FileConfiguration config;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         reloadConfig();
         getServer().getPluginManager().registerEvents(this, this);
+
+        configFile = new File("./plugins/PerPlayerWorld/config.yml");
+        config = YamlConfiguration.loadConfiguration(configFile);
     }
     @Override
     public void onDisable() {}
@@ -50,34 +59,40 @@ public final class PerPlayerWorld extends JavaPlugin implements Listener {
 
         // 获取玩家 UUID (无连字符
         Player player = event.getPlayer();
-        String uuid = player.getUniqueId().toString();
+        String uuid = player.getUniqueId().toString().replaceAll("-", "");
 
         // 检查是否存在这个维度
-        String worldName = "world_"+ uuid.replaceAll("-", "");
+        String worldName = "world_"+ uuid;
         if(getWorld(worldName) == null){
             player.sendMessage(getM("loadWorld"));
             loadWorld(worldName);
             return;
         }
-        tpPlayer(player, worldName);
+        tpPlayer(player, uuid, worldName);
     }
 
-    public void tpPlayer(Player player, String worldName){
+    public void tpPlayer(Player player, String uuid, String worldName){
         player.sendMessage(getM("tp"));
         World world = getWorld(worldName);
+
         // 如果玩家已经在单独的维度
         if(player.getWorld().getName().equals(worldName)){
             // 返回之前的维度
-            Location location = (Location) world.getMetadata("ApliNi.PPW.pLocation").get(0).value();
-            if(location != null){
-                player.teleport(location);
-            }else{
-                getLogger().warning("维度元数据中不包含上一个位置信息! "+ worldName +"@"+ player.getName());
+            Location location = getLocation(uuid);
+            if(location == null){
+                getLogger().warning("未找到上一个位置信息! "+ worldName +"@"+ player.getName());
+                return;
             }
+            setLocation(uuid, player.getLocation());
+            player.teleport(location);
         }else{
             // 传送到单独的维度
-            world.setMetadata("ApliNi.PPW.pLocation", new FixedMetadataValue(this, player.getLocation()));
-            player.teleport(world.getSpawnLocation());
+            Location location = getLocation(uuid);
+            if(location == null){
+                location = world.getSpawnLocation();
+            }
+            setLocation(uuid, player.getLocation());
+            player.teleport(location);
         }
     }
 
@@ -123,5 +138,39 @@ public final class PerPlayerWorld extends JavaPlugin implements Listener {
         return getConfig().getString("command."+ key, null);
     }
 
+    public void setLocation(String uuid, Location location){
 
+        String key = "z."+ uuid +".";
+
+        config.set(key +"world", location.getWorld().getName());
+        config.set(key +"x", location.getX());
+        config.set(key +"y", location.getY());
+        config.set(key +"z", location.getZ());
+        config.set(key +"yaw", location.getYaw());
+        config.set(key +"pitch", location.getPitch());
+
+        // 保存配置文件
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Location getLocation(String uuid){
+
+        String key = "z."+ uuid +".";
+
+        if(config.get(key + "x") != null){
+            return new Location(
+                    getWorld((String) config.get(key + "world")),
+                    (double) config.get(key + "x"),
+                    (double) config.get(key + "y"),
+                    (double) config.get(key + "z"),
+                    (float) config.get(key + "yaw"),
+                    (float) config.get(key + "pitch"));
+
+        }
+        return null;
+    }
 }
