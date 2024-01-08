@@ -88,7 +88,7 @@ public final class PerPlayerWorld extends JavaPlugin implements Listener {
         }else{
             // 传送到单独的维度
             Location location = getLocation(uuid);
-            if(location == null){
+            if(location == null || !location.getWorld().getName().equals(worldName)){
                 location = world.getSpawnLocation();
             }
             setLocation(uuid, player.getLocation());
@@ -164,12 +164,11 @@ public final class PerPlayerWorld extends JavaPlugin implements Listener {
         if(config.get(key + "x") != null){
             return new Location(
                     getWorld((String) config.get(key + "world")),
-                    (double) config.get(key + "x"),
-                    (double) config.get(key + "y"),
-                    (double) config.get(key + "z"),
-                    (float) config.get(key + "yaw"),
-                    (float) config.get(key + "pitch"));
-
+                    config.getDouble(key + "x"),
+                    config.getDouble(key + "y"),
+                    config.getDouble(key + "z"),
+                    (float) config.getDouble(key + "yaw"),
+                    (float) config.getDouble(key + "pitch"));
         }
         return null;
     }
